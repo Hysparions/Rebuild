@@ -31,7 +31,7 @@ public class Font {
 	public Font(String fontType) {
 		
 		//Loading the font Texture
-		texture = Texture.createTexture("res/fonts/", fontType + ".png");
+		texture = Texture.createTexture("res/fonts/" + fontType + ".png");
 
 		//Loading the Glyphs data
 		this.fontType = fontType;

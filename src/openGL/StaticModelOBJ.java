@@ -107,7 +107,7 @@ public class StaticModelOBJ {
 		    {
 		    	AIString path = AIString.calloc();
 		        Assimp.aiGetMaterialTexture(material, Assimp.aiTextureType_DIFFUSE, i, path, (IntBuffer) null, null, null, null, null, null);
-		        Texture texture = Texture.createTexture("res/objects/" + filePath +"/" , path.dataString());
+		        Texture texture = Texture.createTexture("res/objects/" + filePath +"/" + path.dataString());
 		        texture.setType("diffuse");
 		        meshTextures.add(texture);
 		    }

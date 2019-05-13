@@ -1,0 +1,16 @@
+﻿  Block.cpp
+c:\users\louis\desktop\fraternity\fraternity\fraternity\sources\Block.h(4): fatal error C1083: Impossible d'ouvrir le fichier include : 'glm/glm.hpp' : No such file or directory
+  Chunk.cpp
+c:\users\louis\desktop\fraternity\fraternity\fraternity\sources\Chunk.h(7): fatal error C1083: Impossible d'ouvrir le fichier include : 'glm/glm.hpp' : No such file or directory
+  main.cpp
+Sources\main.cpp(1): fatal error C1083: Impossible d'ouvrir le fichier include : 'glad.h' : No such file or directory
+  Model.cpp
+c:\users\louis\desktop\fraternity\fraternity\fraternity\sources\opengl\Model.h(4): fatal error C1083: Impossible d'ouvrir le fichier include : 'glad.h' : No such file or directory
+  stb_image.cpp
+  Perlin.cpp
+  ProgramHandler.cpp
+c:\users\louis\desktop\fraternity\fraternity\fraternity\sources\ProgramHandler.h(3): fatal error C1083: Impossible d'ouvrir le fichier include : 'glad.h' : No such file or directory
+  RessourcesManager.cpp
+c:\users\louis\desktop\fraternity\fraternity\fraternity\sources\RessourcesManager.h(4): fatal error C1083: Impossible d'ouvrir le fichier include : 'glm/glm.hpp' : No such file or directory
+  World.cpp
+c:\users\louis\desktop\fraternity\fraternity\fraternity\sources\World.h(8): fatal error C1083: Impossible d'ouvrir le fichier include : 'glm/glm.hpp' : No such file or directory

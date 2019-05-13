@@ -29,12 +29,12 @@ public class Texture {
 		type = "";
 	}
 	
-	public static Texture createTexture( String directory, String path) {
+	public static Texture createTexture( String path) {
 		try {
 	
 		Texture tex = new Texture();
 		//Storing the path could be useful to know if the texture have already been stored
-		tex.filePath = directory + path;
+		tex.filePath = path;
 		File f = new File(tex.filePath);
 		if(!f.exists()) {throw new IOException("Failed to load " + tex.filePath);}
 		

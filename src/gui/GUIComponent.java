@@ -4,8 +4,8 @@ import org.joml.Vector2f;
 
 public abstract class GUIComponent {
 	
-	private static float MAX_SCALE = 2.0f;
-	private static float MIN_SCALE = 0.25f;
+	//private static float MAX_SCALE = 2.0f;
+	//private static float MIN_SCALE = 0.25f;
 	
 	protected GUIType type;
 	/** Relative Position */
