@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="lib/joml-1.9.12-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/joml-1.9.12-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/joml-1.9.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-assimp-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-assimp-natives-windows.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-assimp-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-assimp.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-glfw-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-glfw-natives-windows.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-glfw-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-glfw.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-natives-windows.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-openal-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-openal-natives-windows.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-openal-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-openal.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-opengl-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-opengl-natives-windows.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-opengl-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-opengl.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-par-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-par-natives-windows.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-par-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-par.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-stb-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-stb-natives-windows.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-stb-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl-stb.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lwjgl.jar"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="res"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
