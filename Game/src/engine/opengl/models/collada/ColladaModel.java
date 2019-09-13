@@ -104,6 +104,14 @@ public class ColladaModel {
 	public void processAnimation(XMLNode node) {
 		
 	}
+	
+	/**
+	 * Getter for the skeleton
+	 * @return the skeleton of the collada model
+	 */
+	public Skeleton skeleton() {
+		return this.skeleton;
+	}
 
 	/** @return the name of the model */
 	public String getName() {

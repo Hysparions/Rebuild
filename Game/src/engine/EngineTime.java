@@ -1,6 +1,6 @@
 package engine;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 /** 
  * This class holds the Global time and delta time between Frames

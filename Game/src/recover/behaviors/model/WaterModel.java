@@ -1,7 +1,7 @@
 package recover.behaviors.model;
 
-import java.nio.ByteBuffer;
 import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import org.joml.Vector2f;

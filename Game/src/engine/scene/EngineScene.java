@@ -147,37 +147,6 @@ public class EngineScene {
 		}
 	}
 	
-	/**
-	 * Handle the Key events to all listeners of the Scene
-	 * @param window The pointer to the window
-	 * @param key The key that raised an event
-	 * @param scancode of the key
-	 * @param action Action Pressed Repeated released
-	 * @param mods of the key
-	 */
-	public void handleKeyEvent(long window, int key, int scancode, int action, int mods) {
-		
-	}
-	
-	/**
-	 * Handle the Resizing event and dispatch it to all resizing listener of the scene
-	 * @param window The pointer to the window
-	 * @param width The new Horizontal size of the window
-	 * @param height The new Vertical size of the window
-	 */
-	public void handleSizeEvent(long window, int width, int height) {
-		
-	}
-	
-	/**
-	 * Handle the Mouse position event and dispatch the message to the scene objects
-	 * @param window Pointer to the window of the engine
-	 * @param x the new cursor horizontal position
-	 * @param y the new cursor vertical position
-	 */
-	public void handleMousePositionEvent(long window, float x, float y) {
-		camera.processMouse(x, y);
-	}
 	
 	/** process camera movements 
 	 * @param window the Engine window 
@@ -186,9 +155,6 @@ public class EngineScene {
 		camera.processInput(window, engineTime.getDeltaTime());
 		camera.updateView();
 	}
-	
-
-	
 	
 	/**
 	 * Get the camera of the scene

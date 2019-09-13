@@ -1,6 +1,6 @@
 package recover;
 
-import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
@@ -21,10 +21,13 @@ import org.joml.Vector3f;
 import engine.Engine;
 import engine.behaviors.BehaviorType;
 import engine.entities.EngineEntity;
+import engine.gui.core.UIWrapper;
+import engine.gui.renderable.text.UIFont;
 import engine.opengl.Shader;
 import engine.opengl.framebuffers.EngineFramebuffer;
 import engine.utils.UnexistingShaderException;
 import recover.behaviors.model.WaterModel;
+import recover.gui.views.MainMenuNavigation;
 import recover.systems.SystemChunkCulling;
 import recover.systems.SystemDecorationRenderer;
 import recover.systems.SystemSpreadingBiome;
@@ -54,6 +57,8 @@ public class Recover extends Engine{
 	private ChunkManager chunkManager;
 	/** model dataBase */
 	private ModelManager modelManager;
+	/** Event Manager */
+	private WindowEventManager eventManager;
 	
 	/**
 	 * Constructor of the Recover Engine
@@ -66,25 +71,30 @@ public class Recover extends Engine{
 		// Chunk Thread Loader
 		this.modelManager = new ModelManager();
 		this.chunkManager = new ChunkManager();
+		this.eventManager = new WindowEventManager(this.scene(), this.gui(), this.size);
 		this.chunkIO = new ChunkIO(chunkManager, modelManager);
 	}
 
 	@Override
+	public void handleKeyEvent(long window, int key, int scancode, int action, int mods) {
+		eventManager.handleKeyEvent(window, key, scancode, action, mods);
+	}
+
+	@Override
+	public void handleSizeEvent(long window, int width, int height) {
+		eventManager.handleSizeEvent(window, width, height);
+	}
+
+	@Override
+	public void handleMousePositionEvent(long window, float x, float y) {
+		eventManager.handleMousePositionEvent(window, x, y);
+	}
+	
+	@Override
 	public void beforeLoop() {
-		// OpenGL Parameters
-		this.vSync(true);
-		this.showEngine(true);
-		this.showEngineMouse(false);
-		// Enabling Depth Test 
-		glEnable(GL_DEPTH_TEST);
-		// Enabling Face Culling
-		glEnable(GL_CULL_FACE);
-		// Enable Blending
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
-		//glEnable(GL_MULTISAMPLE);
-		
+		UIFont font = new UIFont("Helvetica");
+		font.display();
+		font.destroy();
 		// Creation of the servers
 		createShaders();
 		
@@ -102,7 +112,22 @@ public class Recover extends Engine{
 
 		// Start Chunk Loader
 		this.chunkIO.start();
+		
 
+		// OpenGL Parameters
+		this.vSync(true);
+		this.showEngine(true);
+		this.showEngineMouse(false);
+		
+		// Enabling Depth Test 
+		glEnable(GL_DEPTH_TEST);
+		// Enabling Face Culling
+		glEnable(GL_CULL_FACE);
+		// Enable Blending
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
+		glEnable(GL_MULTISAMPLE);
 	}
 
 	/**
@@ -150,7 +175,6 @@ public class Recover extends Engine{
 		scene().executeSystem(BehaviorType.SPREAD_BIOME);
 		//scene().camera().print();
 
-		gui().render();
 		
 		
 		//this.printFPS();
@@ -177,8 +201,6 @@ public class Recover extends Engine{
 	private void createShaders() {
 		// Shaders creation
 		try {
-			this.shaders().addFromSource("Shape");
-			this.shaders().get("Shape").setOrthoProjection(engineSize.x(), engineSize.y());
 			
 			// Terrain shader
 			this.shaders().addFromSource("Terrain");
@@ -231,9 +253,9 @@ public class Recover extends Engine{
 	 * Creates and initializes the frame buffers objects
 	 */
 	private void createFramebuffers() {
-		EngineFramebuffer waterFBO = new EngineFramebuffer("WaterReflection", engineSize);
-		waterFBO.addColorAttachment(engineSize.x, engineSize.y, GL_RGB, false, true, false);
-		waterFBO.setDepthBufferAttachment(engineSize.x, engineSize.y, GL_DEPTH_COMPONENT, false);
+		EngineFramebuffer waterFBO = new EngineFramebuffer("WaterReflection", size);
+		waterFBO.addColorAttachment(size.x, size.y, GL_RGB, false, true, false);
+		waterFBO.setDepthBufferAttachment(size.x, size.y, GL_DEPTH_COMPONENT, false);
 		scene().addFramebuffer(waterFBO);
 	}
 	
@@ -241,6 +263,10 @@ public class Recover extends Engine{
 	 * Creates and Initializes the GUI component
 	 */
 	private void createGUI() {
-			
+		UIWrapper mainMenuNavigation = new MainMenuNavigation();
+		this.gui().register(mainMenuNavigation);
+		this.gui().resize("Main Menu Navigation");
 	}
+
+
 }

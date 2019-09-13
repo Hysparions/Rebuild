@@ -14,6 +14,7 @@ public class Application {
 	 */
 	public static void main(String[] args) {
 		
+
 		// Creation Launch of the game engine
 		Recover game = new Recover(1600, 900, "Recover - The Last Summer");
 		game.launch();

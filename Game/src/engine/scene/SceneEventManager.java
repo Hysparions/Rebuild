@@ -1,6 +1,7 @@
 package engine.scene;
 
 import java.util.ArrayDeque;
+
 import engine.behaviors.EngineBehavior;
 
 /**

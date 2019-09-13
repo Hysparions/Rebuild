@@ -1,7 +1,7 @@
 package recover.behaviors.model;
 
-import java.nio.ByteBuffer;
 import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -19,8 +19,6 @@ import recover.entities.Chunk;
 import recover.utils.Biome;
 import recover.utils.HeightGenerator;
 import recover.utils.TerrainPoint;
-
-import static org.lwjgl.opengl.GL30.*;
 /**
  * This class holds the CPU buffer as well as the Terrain Data
  * @author louis
