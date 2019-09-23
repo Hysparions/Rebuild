@@ -10,7 +10,7 @@ import engine.behaviors.EngineBehavior;
 import engine.opengl.Shader;
 import engine.scene.EngineSystem;
 import engine.scene.SceneEvent;
-import engine.utils.UnexistingShaderException;
+import engine.utils.ShaderException;
 import recover.behaviors.batch.TerrainBatch;
 
 public class SystemTerrainRenderer extends EngineSystem<TerrainBatch>{
@@ -78,7 +78,7 @@ public class SystemTerrainRenderer extends EngineSystem<TerrainBatch>{
 					batch.draw();
 				}
 			}
-		} catch (UnexistingShaderException e) {
+		} catch (ShaderException e) {
 			e.printStackTrace();
 		}	
 	}

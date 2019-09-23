@@ -9,7 +9,7 @@ import engine.behaviors.EngineBehavior;
 import engine.opengl.Shader;
 import engine.scene.EngineSystem;
 import engine.scene.SceneEvent;
-import engine.utils.UnexistingShaderException;
+import engine.utils.ShaderException;
 import recover.behaviors.batch.VegetationBatch;
 
 public class SystemVegetationRenderer extends EngineSystem<VegetationBatch>{
@@ -66,7 +66,7 @@ public class SystemVegetationRenderer extends EngineSystem<VegetationBatch>{
 					batch.draw();
 				}
 			}
-		} catch (UnexistingShaderException e) {
+		} catch (ShaderException e) {
 			e.printStackTrace();
 		}
 

@@ -212,7 +212,7 @@ public class Shader {
 	public void setOrthoProjection(int Scr_W, int Scr_H) {
 		this.use();
 		Matrix4f ortho = new Matrix4f();
-		ortho.ortho(0.0f, Scr_W, 0.0f, Scr_H, -1.0f, 1.0f);
+		ortho.ortho(0.0f, Scr_W, Scr_H, 0.0f, -1.0f, 1.0f);
 		this.setMat4Uni("projection", ortho);
 	}
 

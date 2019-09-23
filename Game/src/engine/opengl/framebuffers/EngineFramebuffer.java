@@ -27,6 +27,7 @@ import org.joml.Vector2i;
 import org.lwjgl.BufferUtils;
 
 import engine.opengl.Texture;
+import engine.utils.TextureException;
 /**
  * This class holds the functions to create a custom frame buffer Object
  * @author louis
@@ -101,10 +102,10 @@ public class EngineFramebuffer {
 		glActiveTexture(GL_TEXTURE0+ textureUnit);
 	}
 	
-	public void addColorAttachment(int width, int height, int format, boolean useNearest, boolean clampToEdge, boolean isDepth) {
+	public void addColorAttachment(int width, int height, int format, int colorAttachment, boolean useNearest, boolean clampToEdge, boolean isDepth) {
 		this.bind();
 		Attachment attachment = Attachment.createRenderTexture(width, height, format,  useNearest, clampToEdge, isDepth); 
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+colorAttachments.size(), attachment.id(), 0);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+colorAttachment, attachment.id(), 0);
 		colorAttachments.add(attachment);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		determineDrawBuffers();
@@ -148,11 +149,18 @@ public class EngineFramebuffer {
 	}
 
 	public Texture getTexture(int i) {
-		Texture texture = new Texture();
-		texture.setID(colorAttachments.get(i).id());
-		texture.setWidth(colorAttachments.get(i).width());
-		texture.setHeight(colorAttachments.get(i).height());
-		return texture;
+		Texture texture;
+		try {
+			texture = new Texture();
+			texture.setID(colorAttachments.get(i).id());
+			texture.setWidth(colorAttachments.get(i).width());
+			texture.setHeight(colorAttachments.get(i).height());
+			return texture;
+		} catch (TextureException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
 	}
 
 	/**

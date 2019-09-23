@@ -34,9 +34,21 @@ import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
 import static org.lwjgl.glfw.GLFW.glfwTerminate;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL30.GL_MULTISAMPLE;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glViewport;
+import static org.lwjgl.opengl.GL32.GL_FIRST_VERTEX_CONVENTION;
+import static org.lwjgl.opengl.GL32.GL_LAST_VERTEX_CONVENTION;
+import static org.lwjgl.opengl.GL32.glProvokingVertex;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import org.joml.Vector2i;
@@ -147,6 +159,8 @@ public abstract class Engine {
 		// resized
 		glfwSetWindowSizeCallback(window, (window, width, height) -> {
 			size.set(width, height);
+			gui.setShadersProjections();
+			scene.camera().updateProjection();
 			glViewport(0, 0, width, height);
 			handleSizeEvent(window, width, height);
 		});
@@ -272,6 +286,54 @@ public abstract class Engine {
 	public final void showEngine(boolean show) {
 		if(show) {glfwShowWindow(window);}
 		else {glfwShowWindow(0);}
+	}
+	
+	/**
+	 * Enable or disable depth test
+	 * @param enable is true when depth test is on
+	 */
+	public final void depthTest(boolean enable) {
+		if(enable) {glEnable(GL_DEPTH_TEST);}
+		else {glDisable(GL_DEPTH_TEST);}
+	}
+	
+	/**
+	 * Enable or disable anti aliasing (multisampling)
+	 * @param enable is true when anti Aliasing is on
+	 */
+	public final void antiAliasing(boolean enable) {
+		if(enable) {glEnable(GL_MULTISAMPLE);}
+		else {glDisable(GL_MULTISAMPLE);}
+	}
+	
+	/**
+	 * Enable or disable cull test
+	 * @param enable is true when cull test is on
+	 */
+	public final void cullTest(boolean enable) {
+		if(enable) {glEnable(GL_CULL_FACE);}
+		else {glDisable(GL_CULL_FACE);}
+	}
+	
+	
+	/**
+	 * Set first or last provoking vertex convention for flat shading
+	 * @param first is true if provoking shading should be with first vertex
+	 */
+	public final void provokinVertexShading(boolean first) {
+		if(first) {glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);}
+		else {glProvokingVertex(GL_LAST_VERTEX_CONVENTION);}
+	}
+	
+	/**
+	 * Enable or disable blend test
+	 * @param enable is true when blend test is on
+	 */
+	public final void blendTest(boolean enable) {
+		if(enable) {glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
+		else {glDisable(GL_BLEND);}
 	}
 	
 	/** Show or hide mouse

@@ -1,16 +1,18 @@
 package engine.gui;
 
-import java.util.HashMap;
+import java.util.LinkedList;
 
 import org.joml.Vector2i;
 
 import engine.ShaderManager;
-import engine.gui.core.UIWrapper;
 import engine.opengl.Shader;
-import engine.utils.UnexistingShaderException;
+import engine.utils.ShaderException;
 
 /**
- * This class controls all the UI Wrappers used by the engine
+ * This class controls all the UI Windows used by the engine
+ * The UIManager handles window by order, which is important for
+ * rendering and UI listeners, has the only lstener that will be 
+ * current is the one of the closest window
  * @author louis
  *
  */
@@ -20,8 +22,8 @@ public final class UIManager {
 	private final Vector2i engineSize;
 	/** Shader Manager containing UI Shaders */
 	private final ShaderManager shaders;
-	/** Map containing all the UI Wrappers registered to rendering */
-	private final HashMap<String, UIWrapper> wrappers;
+	/** Linked List containing all the UIWindow registered to rendering */
+	private final LinkedList<UIWindow> windows;
 	
 	public UIManager(Vector2i engineSize) {
 		
@@ -32,22 +34,58 @@ public final class UIManager {
 		this.shaders = new ShaderManager();
 		
 		// Create Wrappers HashMap
-		this.wrappers = new HashMap<String, UIWrapper>();
+		this.windows = new LinkedList<UIWindow>();
 		
+	}
+	
+	/**
+	 * This function proceed successively all this operations :
+	 * - Running animations that may change Windows position or size
+	 * as well as updating the size hints of one or more component
+	 * - For each visible windows, Do :
+	 * - Build size and position of all the components that have been updated
+	 * - Process Hover input
+	 * - Find the last Hovered component with a Hovered Listener
+	 * - If the Hover listener has animation => proceed animation
+	 * - Process scroll input
+	 * - If the Hovered panel is a scroll one => scroll
+	 * - Process cursor click
+	 * - If the Hovered component has a selectable Listener => Make it selected
+	 * - Process Keyboard Input
+	 * - If the selected component contains a Text listener => Give it keyboard input
+	 * - End of the function
+	 */
+	public void process() {
+		
+	}
+	
+	/**
+	 * Renders the window list by order
+	 * the window order is important as windows rendered first
+	 * may be overlapped by windows rendered after
+	 */
+	public void render() {
+		for(UIWindow window : this.windows) {
+			if(window.isVisible()) {
+				window.render(shaders);
+			}
+		}
 	}
 	
 	/**
 	 * Register this UI Wrapper so it is now able to be rendered to the screen
 	 * using the render function of the UIManager
-	 * @param wrapper to register
+	 * @param window to register
 	 * @return true if the operation succeed, false instead 
 	 */
-	public boolean register(UIWrapper wrapper) {
-		if(wrapper != null) {
-			if(!wrappers.containsKey(wrapper.name())){
-				this.wrappers.put(wrapper.name(), wrapper);
-				return true;
+	public boolean register(UIWindow window) {
+		if(window != null) {
+			for(UIWindow elem : windows) {
+				if(elem == window || elem.name().equals(window.name())) {
+					return false;
+				}
 			}
+			this.windows.add(window);
 		}
 		return false;
 	}
@@ -59,26 +97,41 @@ public final class UIManager {
 	 * @param destroy to true if the Wrapper should be destroyed
 	 * @return the wrapper if destroy was false, null if the wrapper doesn't exist or was destroyed
 	 */
-	public UIWrapper unregister(String name, boolean destroy) {
-		UIWrapper wrapper = null;
-		wrapper = this.wrappers.get(name);
+	public UIWindow unregister(String name, boolean destroy) {
+		UIWindow wrapper = null;
+		wrapper = this.get(name);
 		if(destroy) {
 			wrapper.destroy();
 			return null;
 		}
 		return wrapper;
 	}
+
+	/**
+	 * This function calls the resize function of the Wrapper
+	 * associated to the name given in parameters
+	 * @param name of the window
+	 * @return true if the operation succeed, false if the dimensions are higher than max or lower than min values
+	 */
+	public boolean resize(String name, float width, float height) {
+		UIWindow window = this.get(name);
+		if(window != null) {
+			window.resize(width, height);
+			return true;
+		}
+		return false;
+	}
 	
 	/**
 	 * This function calls the resize function of the Wrapper
 	 * associated to the name given in parameters
-	 * @param name of the wrapper
-	 * @return true if the operation succeed
+	 * @param name of the window
+	 * @return true if the operation succeed, false if the dimensions are higher than max or lower than min values
 	 */
-	public boolean resize(String name) {
-		UIWrapper wrapper = this.get(name);
-		if(wrapper != null) {
-			wrapper.resizeAndPosition(engineSize.x, engineSize.y);
+	public boolean reposition(String name, float x, float y) {
+		UIWindow window = this.get(name);
+		if(window != null) {
+			window.reposition(x, y);
 			return true;
 		}
 		return false;
@@ -90,6 +143,20 @@ public final class UIManager {
 	 */
 	public ShaderManager shaders() {
 		return shaders;
+	}
+
+	/**
+	 * Creates the gui shaders
+	 */
+	public void createShaders() {
+		try {
+			this.shaders.addFromSource("UIShape");
+			this.shaders.addFromSource("UISprite");
+			this.shaders.addFromSource("UIText");
+			this.setShadersProjections();
+		} catch (ShaderException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -109,31 +176,50 @@ public final class UIManager {
 			if(shader != null) { 
 				shader.setOrthoProjection(engineSize.x, engineSize.y);
 			}
-		}catch(UnexistingShaderException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Creates the gui shaders
-	 */
-	public void createShaders() {
-		try {
-			this.shaders.addFromSource("UIShape");
-			this.shaders.addFromSource("UISprite");
-			this.shaders.addFromSource("UIText");
-			this.setShadersProjections();
-		} catch (UnexistingShaderException e) {
+		}catch(ShaderException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	/** 
-	 * Get the wrapper associated to the given name if it exists 
-	 * @param name of the Wrapper
-	 * @return the wrapper associated to this name
+	 * Get the Window associated to the given name if it exists 
+	 * @param name of the Window
+	 * @return the Window associated to this name
 	 */
-	public UIWrapper get(String name) {
-		return this.wrappers.get(name);
+	public UIWindow get(String name) {
+		for(UIWindow window : windows) {
+			if(window.name().equals(name)) {
+				return window;
+			}
+		}
+		return null;
 	}
+
+	/**
+	 * put the window associated to the specified name in front of all the others
+	 * @param name of the window to push in front of the scene
+	 */
+	public void pushFront(String name) {
+		UIWindow window = this.get(name);
+		if(window !=null) {
+			this.windows.remove(window);
+			this.windows.addLast(window);
+		}
+	}
+	
+	/**
+	 * Destroys all the windows and clear the UIWindow List
+	 * Destroys the shaders used by the UI
+	 */
+	public void destroy() {
+		for(UIWindow window : windows) {
+			window.destroy();
+		}
+		windows.clear();
+		shaders.destroy();
+	}
+
+	
+	
+	
 }

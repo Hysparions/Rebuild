@@ -1,18 +1,9 @@
 package recover;
 
-import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_COMPONENT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
-import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_RGB;
-import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.glBlendFunc;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL32.GL_FIRST_VERTEX_CONVENTION;
-import static org.lwjgl.opengl.GL32.glProvokingVertex;
 
 import java.util.ArrayList;
 
@@ -21,11 +12,11 @@ import org.joml.Vector3f;
 import engine.Engine;
 import engine.behaviors.BehaviorType;
 import engine.entities.EngineEntity;
-import engine.gui.core.UIWrapper;
-import engine.gui.renderable.text.UIFont;
+import engine.gui.UIWindow;
+import engine.gui.text.UIFont;
 import engine.opengl.Shader;
 import engine.opengl.framebuffers.EngineFramebuffer;
-import engine.utils.UnexistingShaderException;
+import engine.utils.ShaderException;
 import recover.behaviors.model.WaterModel;
 import recover.gui.views.MainMenuNavigation;
 import recover.systems.SystemChunkCulling;
@@ -49,8 +40,8 @@ public class Recover extends Engine{
 
 	/** The seed used to create the world */
 	public static final int SEED = 23021998;
-	// SEED x 10000 z 0 = 1215149
-	
+	// SEED x 10000 z 0 = 23021998
+
 	/** Chunk In / Out Thread */
 	private ChunkIO chunkIO;
 	/** Chunk Manager holding the bridge between the main thread and the chunk In/Out thread*/
@@ -59,7 +50,7 @@ public class Recover extends Engine{
 	private ModelManager modelManager;
 	/** Event Manager */
 	private WindowEventManager eventManager;
-	
+
 	/**
 	 * Constructor of the Recover Engine
 	 * @param width of the screen
@@ -89,45 +80,55 @@ public class Recover extends Engine{
 	public void handleMousePositionEvent(long window, float x, float y) {
 		eventManager.handleMousePositionEvent(window, x, y);
 	}
-	
+
 	@Override
 	public void beforeLoop() {
-		UIFont font = new UIFont("Helvetica");
-		font.display();
-		font.destroy();
-		// Creation of the servers
-		createShaders();
+
+		// START STEP
+
+		// Enable vertical synchronization
+		this.vSync(true);
+		// Show the engine window
+		this.showEngine(true);
+		// Show the cursor
+		this.showEngineMouse(false);
+		// Enabling Depth Test 
+		this.depthTest(true);
+		// Enabling Face Culling
+		this.cullTest(true);
+		// Enable Blending
+		this.blendTest(true);
+		// Provoking vertex shading
+		this.provokinVertexShading(true);
+		// Enabling MSAA
+		this.antiAliasing(true);
 		
+		// Set blank screen on launch
+		this.setClearColor(1.f, 1.f, 1.f, 1.f);
+		this.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		this.swap();
+		
+		// LOADING STEP		
+		
+		// Creation of the fonts
+		createFonts();
+		// Creation of the shaders
+		createShaders();
 		// Creation of the Framebuffers
 		createFramebuffers();
 
 		// Creating the Systems
 		createSystems();
-		
+
 		// Create the GUI
 		createGUI();
-		
+
 		// Set max priority to the rendering thread
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
 		// Start Chunk Loader
 		this.chunkIO.start();
-		
 
-		// OpenGL Parameters
-		this.vSync(true);
-		this.showEngine(true);
-		this.showEngineMouse(false);
-		
-		// Enabling Depth Test 
-		glEnable(GL_DEPTH_TEST);
-		// Enabling Face Culling
-		glEnable(GL_CULL_FACE);
-		// Enable Blending
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
-		glEnable(GL_MULTISAMPLE);
 	}
 
 	/**
@@ -138,8 +139,6 @@ public class Recover extends Engine{
 	 */
 	@Override
 	public void onLoop() {
-
-		
 		this.setClearColor(0.8f, 0.93f, 1.0f, 1.0f);
 		this.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -159,7 +158,7 @@ public class Recover extends Engine{
 
 		// Polling Scene Event
 		scene().dispatchEvents();
-		
+
 		// Culling
 		scene().executeSystem(BehaviorType.CHUNK_CULLING);
 		// Terrain Drawing
@@ -170,13 +169,15 @@ public class Recover extends Engine{
 		scene().executeSystem(BehaviorType.VEGETATION_BATCH);
 		// Water Drawing
 		scene().executeSystem(BehaviorType.WATER_BATCH);
-		
 		// Spreading Biome
 		scene().executeSystem(BehaviorType.SPREAD_BIOME);
 		//scene().camera().print();
 
-		
-		
+		// UI Process
+		gui().process();
+		//gui().render("Main Menu Navigation");
+
+
 		//this.printFPS();
 		this.swap();
 	}
@@ -189,26 +190,27 @@ public class Recover extends Engine{
 		for(int i  = 0; i < list.size(); i++) {
 			scene().removeEntity(list.get(i));
 		}
-		
+
 		// Destroy scene shaders and fbos
 		scene().destroy();
-		
+		// Destroy gui shaders and buffers
+		gui().destroy();
 	}
-	
+
 	/**
 	 * Create and initializes all the shader programs of the game
 	 */
 	private void createShaders() {
 		// Shaders creation
 		try {
-			
+
 			// Terrain shader
 			this.shaders().addFromSource("Terrain");
 			Shader terrainShader = this.scene().shaders().get("Terrain");
 			terrainShader.setDirLight(new Vector3f(-0.8f, -0.7f, -0.5f), new Vector3f(0.3f, 0.3f, 0.3f), new Vector3f(0.6f, 0.6f, 0.6f), new Vector3f(0.4f, 0.4f, 0.4f));
 			terrainShader.setFloatUni("viewDistance", 400.f);
 			terrainShader.setFloatUni("swapTime", TerrainPoint.SWAP_TIME);
-			
+
 			// Water Shader
 			this.shaders().addFromSource("Water");
 			Shader waterShader = scene().shaders().get("Water");
@@ -216,14 +218,14 @@ public class Recover extends Engine{
 			waterShader.setIntUni("reflection", 0);
 			waterShader.setFloatUni("waterLevel", WaterModel.WATER_LEVEL);
 			waterShader.setFloatUni("viewDistance", 400.f);
-			
+
 			// Decoration Shader
 			this.shaders().addFromSource("Decoration");
 			Shader decorationShader = scene().shaders().get("Decoration");
 			decorationShader.setDirLight(new Vector3f(-0.8f, -0.7f, -0.5f), new Vector3f(0.3f, 0.3f, 0.3f), new Vector3f(0.6f, 0.6f, 0.6f), new Vector3f(0.4f, 0.4f, 0.4f));
 			decorationShader.setFloatUni("material.shininess", 4.0f);
 			decorationShader.setFloatUni("viewDistance", 400.f);
-			
+
 			// Vegetation Shader
 			this.shaders().addFromSource("Vegetation");
 			Shader vegetationShader = scene().shaders().get("Vegetation");
@@ -232,8 +234,8 @@ public class Recover extends Engine{
 			vegetationShader.setFloatUni("viewDistance", 400.f);
 
 
-		} catch (UnexistingShaderException e) {e.printStackTrace();}
-		
+		} catch (ShaderException e) {e.printStackTrace();}
+
 	}
 
 	/**
@@ -248,24 +250,28 @@ public class Recover extends Engine{
 		this.scene().addSystem(new SystemVegetationRenderer());
 		this.scene().addSystem(new SystemSpreadingBiome());
 	}
-	
+
 	/**
 	 * Creates and initializes the frame buffers objects
 	 */
 	private void createFramebuffers() {
 		EngineFramebuffer waterFBO = new EngineFramebuffer("WaterReflection", size);
-		waterFBO.addColorAttachment(size.x, size.y, GL_RGB, false, true, false);
+		waterFBO.addColorAttachment(size.x, size.y, GL_RGB, 0, false, true, false);
 		waterFBO.setDepthBufferAttachment(size.x, size.y, GL_DEPTH_COMPONENT, false);
 		scene().addFramebuffer(waterFBO);
 	}
-	
+
 	/**
 	 * Creates and Initializes the GUI component
 	 */
 	private void createGUI() {
-		UIWrapper mainMenuNavigation = new MainMenuNavigation();
+		UIWindow mainMenuNavigation = new MainMenuNavigation();
 		this.gui().register(mainMenuNavigation);
-		this.gui().resize("Main Menu Navigation");
+	}
+
+	private void createFonts() {
+		UIFont.createFont("HelvLight");
+
 	}
 
 

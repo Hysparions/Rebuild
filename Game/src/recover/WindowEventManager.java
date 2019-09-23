@@ -9,7 +9,6 @@ import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowMonitor;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
-import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
 
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -46,10 +45,18 @@ public class WindowEventManager{
 		this.size = size;
 	}
 
+	/**
+	 * This function is used to handle the resizing of gui component when the window is resized by the user
+	 * @param window resized
+	 * @param width of the screen in pixels
+	 * @param height of the screen in pixels
+	 */
 	public void handleSizeEvent(long window, int width, int height) {
-		gui.setShadersProjections();
-		gui.resize("Main Menu Navigation");
-		scene.camera().updateProjection();
+		
+		//gui.resize("Main Menu Navigation", width/1.6f, height/20.0f);
+		//float w = gui.get("Main Menu Navigation").width();
+		//float h = gui.get("Main Menu Navigation").height();
+		//gui.reposition("Main Menu Navigation", (width-w)/2, (height-h)/2);
 	}
 
 	public void handleMousePositionEvent(long window, float x, float y) {
@@ -66,13 +73,13 @@ public class WindowEventManager{
 				GLFWVidMode vidMode = glfwGetVideoMode(monitor);
 				glfwSetWindowMonitor(window, 0 , 0, 0, 1600, 900, GLFW_DONT_CARE);
 				glfwSetWindowPos(window, vidMode.width()/2-800, vidMode.height()/2-450);
-				glfwSwapInterval(1);
+				
 			}else {
 				fullscreen(true);
 				long monitor = glfwGetPrimaryMonitor();
 				GLFWVidMode vidMode = glfwGetVideoMode(monitor);
-				glfwSetWindowMonitor(window, monitor, 0, 0, vidMode.width(), vidMode.height(), vidMode.refreshRate());
-				glfwSwapInterval(1);
+				glfwSetWindowMonitor(window, monitor, 0, 0, vidMode.width(), vidMode.height(), GLFW_DONT_CARE);
+				
 			}
 			
 		}else {
@@ -94,5 +101,12 @@ public class WindowEventManager{
 	 */
 	protected void fullscreen(boolean activate) {
 		this.fullscreen = activate;
+	}
+	
+	/** 
+	 * @return the engine size
+	 */
+	public Vector2i size() {
+		return size;
 	}
 }

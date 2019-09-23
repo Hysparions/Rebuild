@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import engine.opengl.Shader;
-import engine.utils.UnexistingShaderException;
+import engine.utils.ShaderException;
 
 
 /**
@@ -47,11 +47,11 @@ public final class ShaderManager {
 	 * @param shader the shader object
 	 * @throws UnexistingShaderException  if the shader doesn't exist in shader resource folder
 	 */
-	public boolean addFromSource(String name) throws UnexistingShaderException{
+	public boolean addFromSource(String name) throws ShaderException{
 		if(name != null) {
 			Shader shader = new Shader();
 			if (shader.create(name) == false) {
-				throw new UnexistingShaderException();
+				throw new ShaderException();
 			}else {
 				shadersMap.put(name, shader);
 				return true;
@@ -83,14 +83,14 @@ public final class ShaderManager {
 	 * @return the shader associated to the name, build it from source if necessary
 	 * @throws UnexistingShaderException if the shader doesn't exist
 	 */
-	public Shader get(String name) throws UnexistingShaderException{
+	public Shader get(String name) throws ShaderException{
 		
 		if(shadersMap.containsKey(name)){
 			return shadersMap.get(name);
 		}else {
 			Shader shader = new Shader();
 			if (shader.create(name) == false) {
-				throw new UnexistingShaderException();
+				throw new ShaderException();
 			}else {
 				shadersMap.put(name, shader);
 				return shader;

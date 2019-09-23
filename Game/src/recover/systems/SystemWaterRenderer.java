@@ -10,7 +10,7 @@ import engine.opengl.Shader;
 import engine.opengl.framebuffers.EngineFramebuffer;
 import engine.scene.EngineSystem;
 import engine.scene.SceneEvent;
-import engine.utils.UnexistingShaderException;
+import engine.utils.ShaderException;
 import recover.behaviors.batch.TerrainBatch;
 import recover.behaviors.batch.VegetationBatch;
 import recover.behaviors.batch.WaterBatch;
@@ -157,7 +157,7 @@ public class SystemWaterRenderer extends EngineSystem<WaterBatch>{
 			}
 			glEnable(GL_CULL_FACE);
 			glDisable(GL_CLIP_DISTANCE0);
-		} catch (UnexistingShaderException e) {
+		} catch (ShaderException e) {
 			e.printStackTrace();
 		}		
 	}

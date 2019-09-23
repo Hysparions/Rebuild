@@ -17,15 +17,19 @@ import static org.lwjgl.opengl.GL11.glTexImage2D;
 import static org.lwjgl.opengl.GL11.glTexParameteri;
 import static org.lwjgl.opengl.GL12.GL_TEXTURE_MAX_LEVEL;
 import static org.lwjgl.opengl.GL13.GL_CLAMP_TO_BORDER;
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
-import java.io.File;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 
-import org.lwjgl.BufferUtils;
-import org.lwjgl.stb.STBImage;
+import javax.imageio.ImageIO;
+
+
+import engine.utils.TextureException;
 
 public class Texture {
 
@@ -37,7 +41,7 @@ public class Texture {
 	// Used by Models to determine if it's a diffuse or a Specular texture
 	private String type;
 
-	public Texture() {
+	public Texture()  throws TextureException{
 		filePath = "";
 		id = 0;
 		width = 0;
@@ -46,42 +50,33 @@ public class Texture {
 		type = "";
 	}
 
-	public static Texture createTexture(String path) {
+	public Texture(String path) throws TextureException{
 		try {
+			// Storing the path could be useful to know if the texture have already beenstored
+			this.filePath = path;
+			// Reading the file
 
-			Texture tex = new Texture();
-			// Storing the path could be useful to know if the texture have already been
-			// stored
-			tex.filePath = path;
-			File f = new File(tex.filePath);
-			if (!f.exists()) {
-				throw new IOException("Failed to load " + tex.filePath);
-			}
-
-			/// Buffers to get image info;
-			IntBuffer w = BufferUtils.createIntBuffer(1);
-			IntBuffer h = BufferUtils.createIntBuffer(1);
-			IntBuffer c = BufferUtils.createIntBuffer(1);
-
-			// Loading Data Using STB
-			STBImage.stbi_set_flip_vertically_on_load(true);
-			ByteBuffer image = STBImage.stbi_load(f.toString(), w, h, c, 4);
-			// Verification that the data has been successfully loaded
-			if (image == null) {
-
-				throw new IOException(STBImage.stbi_failure_reason());
-			}
-
+			BufferedImage bufferedImage = ImageIO.read(Texture.class.getResourceAsStream(this.filePath));
 			// Get BUffer Values
-			tex.width = w.get();
-			tex.height = h.get();
-			tex.channels = c.get();
+			this.width = bufferedImage.getWidth();
+			this.height = bufferedImage.getHeight();
+			this.channels = bufferedImage.getColorModel().getNumComponents();
+			int[] pixels = bufferedImage.getRGB(0, 0, this.width, this.height, null, 0,this.width);
+		    ByteBuffer image = ByteBuffer.allocateDirect(pixels.length * 4);
+		    for (int pixel : pixels) {
+		    	image.put((byte) ((pixel >> 16) & 0xFF));
+		    	image.put((byte) ((pixel >> 8) & 0xFF));
+		    	image.put((byte) (pixel & 0xFF));
+		    	image.put((byte) (pixel >> 24));
+		    }
+		    ((Buffer)image).flip();
+		    
 
 			// Generate the texture to the address defined in the id
-			tex.id = glGenTextures();
+			this.id = glGenTextures();
 			// System.out.println(tex.filePath + tex.id);
 			// Bind it as the current Texture
-			glBindTexture(GL_TEXTURE_2D, tex.id);
+			glBindTexture(GL_TEXTURE_2D, this.id);
 
 			// Setup wrap mode
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -90,21 +85,15 @@ public class Texture {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 7);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this.width, this.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 			// Generate MipMap automatically
 			glGenerateMipmap(GL_TEXTURE_2D);
 			// Unbind Texture
 			glBindTexture(GL_TEXTURE_2D, 0);
-			// Finally Free the Image
-			STBImage.stbi_image_free(image);
-
-			return tex;
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		return null;
 	}
 
 	/** Returns the id of the Texture */

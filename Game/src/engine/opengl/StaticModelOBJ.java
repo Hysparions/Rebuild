@@ -18,6 +18,8 @@ import org.lwjgl.assimp.AIString;
 import org.lwjgl.assimp.AIVector3D;
 import org.lwjgl.assimp.Assimp;
 
+import engine.utils.TextureException;
+
 public class StaticModelOBJ {
 
 	private String filePath;
@@ -119,9 +121,14 @@ public class StaticModelOBJ {
 				AIString path = AIString.calloc();
 				Assimp.aiGetMaterialTexture(material, Assimp.aiTextureType_DIFFUSE, i, path, (IntBuffer) null, null,
 						null, null, null, null);
-				Texture texture = Texture.createTexture("res/objects/" + filePath + "/" + path.dataString());
-				texture.setType("diffuse");
-				meshTextures.add(texture);
+				Texture texture;
+				try {
+					texture = new Texture("res/objects/" + filePath + "/" + path.dataString());
+					texture.setType("diffuse");
+					meshTextures.add(texture);
+				} catch (TextureException e) {
+					e.printStackTrace();
+				}
 			}
 
 		}
