@@ -18,6 +18,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 
+import engine.gui.UIBox;
 import engine.gui.UIRenderable;
 import engine.utils.Color;
 import engine.utils.FontException;
@@ -42,8 +43,8 @@ public abstract class UIText extends UIRenderable{
 	protected Matrix4f model;
 	
 	
-	public UIText(boolean fitParent, String text, String font, Color color, float fontMin, float fontMax) {
-		super(fitParent);
+	protected UIText(UIBox box, String text, String font, Color color, float fontMin, float fontMax) {
+		super(null);
 		try {
 			// Text 
 			this.text = text;
@@ -93,8 +94,8 @@ public abstract class UIText extends UIRenderable{
 		
 	}
 	
-	public UIText(boolean fitParent, String text, String font, Color color, float fontSize) throws FontException {
-		this(fitParent, text, font, color, fontSize, fontSize);
+	protected UIText(UIBox box, String text, String font, Color color, float fontSize) throws FontException {
+		this(box, text, font, color, fontSize, fontSize);
 	}
 	
 	

@@ -10,6 +10,8 @@ public abstract class UILayout {
 	protected LinkedList<UIComponent> children;
 	/** Margin */
 	protected UIMargin margin;
+	/** FitChildren boolean */
+	boolean fitChildren;
 	
 	
 	/** 
@@ -45,7 +47,7 @@ public abstract class UILayout {
 	 * @param fitChildren boolean
 	 * @return true if a modification occurred on the component
 	 */
-	public abstract boolean findDimension(boolean fitChildren);
+	public abstract boolean findDimension();
 	
 	/**
 	 * This Function computes the size and position of all children 
@@ -65,13 +67,22 @@ public abstract class UILayout {
 	}
 	
 	/**
-	 * Get the margin of the Layout 
-	 * @return
+	 * UIMargin Setter
+	 * @param top in pixels
+	 * @param bottom in pixels
+	 * @param left in pixels
+	 * @param right in pixels
 	 */
-	public UIMargin margin() {
-		return this.margin;
+	public void margin(float top, float bottom, float left, float right) {
+		this.margin.set(top, bottom, left, right);
+		this.findDimension();
 	}
 	
-	
-	
+	/**
+	 * Setter of the fitChildren boolean
+	 * @param fitChildren
+	 */
+	public void fitChildren(boolean fitChildren) {
+		this.fitChildren = fitChildren;
+	}
 }

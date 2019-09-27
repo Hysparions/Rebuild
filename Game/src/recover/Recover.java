@@ -116,10 +116,8 @@ public class Recover extends Engine{
 		createShaders();
 		// Creation of the Framebuffers
 		createFramebuffers();
-
 		// Creating the Systems
 		createSystems();
-
 		// Create the GUI
 		createGUI();
 
@@ -174,8 +172,8 @@ public class Recover extends Engine{
 		//scene().camera().print();
 
 		// UI Process
-		gui().process();
-		//gui().render("Main Menu Navigation");
+		
+		gui().render();
 
 
 		//this.printFPS();
@@ -265,8 +263,10 @@ public class Recover extends Engine{
 	 * Creates and Initializes the GUI component
 	 */
 	private void createGUI() {
-		UIWindow mainMenuNavigation = new MainMenuNavigation();
-		this.gui().register(mainMenuNavigation);
+		UIWindow mainMenu = new MainMenuNavigation();
+		((MainMenuNavigation) mainMenu).updateBox(size());
+		this.gui().register(mainMenu);
+		gui().process();
 	}
 
 	private void createFonts() {

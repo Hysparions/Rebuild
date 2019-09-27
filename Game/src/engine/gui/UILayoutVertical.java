@@ -36,7 +36,7 @@ public class UILayoutVertical extends UILayout{
 	}
 
 	@Override
-	public boolean findDimension(boolean fitChildren) {
+	public boolean findDimension() {
 		boolean modified = false;
 		float minX =0.0f, minY = 0.0f;
 		
@@ -101,10 +101,10 @@ public class UILayoutVertical extends UILayout{
 	@Override
 	public void buildChildren() {
 		
-		float x = this.box.position().x();
-		float y = this.box.position().y();
-		float w = this.box.size().x();
-		float h = this.box.size().y();
+		float x = this.box.position().x() + margin.left();
+		float y = this.box.position().y() + margin.top();
+		float w = this.box.size().x() - margin.left()-margin.right();
+		float h = this.box.size().y() - margin.top()-margin.bottom();
 		
 		if(this.box.minimal().y() >= h && this.box.maximal().y() <= h){
 
@@ -116,7 +116,7 @@ public class UILayoutVertical extends UILayout{
 				ratio = (h-this.box.minimal().y()) / (this.box.maximal().y() - this.box.minimal().y());
 			}
 			// Keep offset
-			float offset = this.box.position().y();
+			float offset = y;
 			for(UIComponent component : children) {
 				component.build(x, offset, w , box.minimal().y() +(box.maximal().y()-box.minimal().y()) * ratio );
 				offset += box.minimal().y() +(box.maximal().y()-box.minimal().y()) * ratio;

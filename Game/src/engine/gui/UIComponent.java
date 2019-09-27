@@ -1,5 +1,7 @@
 package engine.gui;
 
+import engine.ShaderManager;
+
 public abstract class UIComponent {
 
 	/** UIBox containing size and position of the component */
@@ -24,7 +26,7 @@ public abstract class UIComponent {
 	 * @param box
 	 */
 	public UIComponent(UIBox box) {
-		if(this.box == null) {
+		if(box == null) {
 			this.box = new UIBox();
 		}else {
 			this.box = box;
@@ -65,6 +67,14 @@ public abstract class UIComponent {
 	 * @param height of the component
 	 */
 	public abstract void build(float x, float y, float width, float height);
+	
+	
+	/**
+	 * This method render the component to the screen
+	 * It applies the global position offset of the absolute parent component
+	 * @param shaders of the UImanager
+	 */
+	public abstract void render(ShaderManager shaders);
 	
 	/**
 	 * Destroy this component if necessary and all children components

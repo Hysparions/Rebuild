@@ -53,10 +53,7 @@ public class WindowEventManager{
 	 */
 	public void handleSizeEvent(long window, int width, int height) {
 		
-		//gui.resize("Main Menu Navigation", width/1.6f, height/20.0f);
-		//float w = gui.get("Main Menu Navigation").width();
-		//float h = gui.get("Main Menu Navigation").height();
-		//gui.reposition("Main Menu Navigation", (width-w)/2, (height-h)/2);
+		gui.resize(size);
 	}
 
 	public void handleMousePositionEvent(long window, float x, float y) {

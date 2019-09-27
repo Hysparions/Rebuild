@@ -9,9 +9,11 @@ import java.util.LinkedList;
 
 import org.joml.Vector2f;
 
+import engine.ShaderManager;
 import engine.opengl.Shader;
 import engine.utils.Color;
 import engine.utils.FontException;
+import engine.utils.ShaderException;
 
 /**
  * UI Label is a OneLiner Text adapting the textBox to the content
@@ -36,7 +38,7 @@ public class UILabel extends UIText{
 	 * @throws FontException 
 	 */
 	public UILabel(String text, String font, Color color, float fontMin, float fontMax) {
-		super(false, text, font, color, fontMin, fontMax);
+		super(null, text, font, color, fontMin, fontMax);
 		this.words = new LinkedList<UIWord>();
 		this.box.keepAspect(true);
 		// Compute words
@@ -82,29 +84,37 @@ public class UILabel extends UIText{
 		((Buffer)this.buffer).position(0);
 		((Buffer)this.buffer).limit(offset);
 		this.length = cursor;
-		this.box.minimal(length*fontMin, font.baseLine()*fontMin);
-		this.box.optimal(length*(fontMin+((fontMax-fontMin)/2.0f)), font.baseLine()*(fontMin+((fontMax-fontMin)/2.0f)));
-		this.box.maximal(length*fontMax, font.baseLine()*fontMax);
+		this.box.minimal(length*fontMin, font.lineHeight()*fontMin);
+		this.box.optimal(length*(fontMin+((fontMax-fontMin)/2.0f)), font.lineHeight()*(fontMin+((fontMax-fontMin)/2.0f)));
+		this.box.maximal(length*fontMax, font.lineHeight()*fontMax);
 	}
 
 	@Override
-	public void render(Shader shader, Vector2f windowPos) {
-		// Computing font size
-		this.fontSize = fontMin*(this.box.size().y()/this.box.minimal().y());
-		// Computing model matrix
-		this.model.identity();
-		this.model.translate(this.box.position().x()+windowPos.x,this.box.position().y()+windowPos.y, 0.0f);
-		this.model.scale(fontSize);
-		// Computing edge and width
-		this.edge = 0.3f - (0.25f * ((fontSize-UIFont.FONT_MIN_SIZE)/(UIFont.FONT_MAX_SIZE-UIFont.FONT_MIN_SIZE)));
-		// Computing shaders uniforms
-		shader.use();
-		shader.setMat4Uni("model", model);
-		shader.setFloatUni("edge", edge);
-		this.font.texture.bind(0);
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-		glBindVertexArray(0);
+	public void render(ShaderManager shaders) {
+		try {
+			
+			Shader shader = shaders.get("UIText");
+			// Computing font size
+			this.fontSize = fontMin*(this.box.size().y()/this.box.minimal().y());
+			// Computing model matrix
+			this.model.identity();
+			this.model.translate(this.box.position().x(),this.box.position().y(), 0.0f);
+			this.model.scale(fontSize);
+			// Computing edge and width
+			this.edge = 0.3f - (0.25f * ((fontSize-UIFont.FONT_MIN_SIZE)/(UIFont.FONT_MAX_SIZE-UIFont.FONT_MIN_SIZE)));
+			// Computing shaders uniforms
+			shader.use();
+			shader.setMat4Uni("model", model);
+			shader.setFloatUni("edge", edge);
+			this.font.texture.bind(0);
+			glBindVertexArray(VAO);
+			glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+			glBindVertexArray(0);
+			
+		} catch (ShaderException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	
@@ -112,7 +122,7 @@ public class UILabel extends UIText{
 	 * Returns the length of the UI Label in pixel with a font size given
 	 * @param fontSize for the width
 	 */
-	public float width(float fontSize) {
+	public float length(float fontSize) {
 		return this.length*fontSize;
 	}
 	
@@ -126,6 +136,14 @@ public class UILabel extends UIText{
 		this.box.minimal(length*fontMin, font.baseLine()*fontMin);
 		this.box.optimal(length*(fontMin+((fontMax-fontMin)/2.0f)), font.baseLine()*(fontMin+((fontMax-fontMin)/2.0f)));
 		this.box.maximal(length*fontMax, font.baseLine()*fontMax);
+	}
+	
+	/**
+	 * Getter for the color of the text
+	 * @return the color of the label
+	 */
+	public Color color() {
+		return this.color();
 	}
 
 }

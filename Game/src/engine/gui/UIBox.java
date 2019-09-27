@@ -38,6 +38,21 @@ public class UIBox {
 	
 	/**
 	 * Over Loaded constructor of the UIBox object
+	 * Set optimal values has average between min and maximal values
+	 * @param minimalWidth dimension in pixel
+	 * @param minimalHeight dimension in pixel
+	 * @param maximalWidth dimension in pixel
+	 * @param maximalHeight dimension in pixel
+	 */
+	public UIBox(float minimalWidth, float minimalHeight, float maximalWidth, float maximalHeight) {
+		this();
+		this.minimal(minimalWidth, minimalHeight);
+		this.optimal((maximalWidth+minimalWidth)/2.0f, (maximalHeight+minimalHeight)/2.0f);
+		this.maximal(maximalWidth, maximalHeight);
+	}
+	
+	/**
+	 * Over Loaded constructor of the UIBox object
 	 * @param minimalWidth dimension in pixel
 	 * @param minimalHeight dimension in pixel
 	 * @param optimalWidth dimension in pixel
@@ -50,7 +65,6 @@ public class UIBox {
 		this.minimal(minimalWidth, minimalHeight);
 		this.optimal(optimalWidth, optimalHeight);
 		this.maximal(maximalWidth, optimalHeight);
-		
 	}
 	
 
@@ -90,8 +104,8 @@ public class UIBox {
 	 * @param height in pixels
 	 */
 	void size(float width, float height) {
-		width = width<0.0f?0.0f:width;
-		height = height<0.0f?0.0f:height;
+		width = width<minimal().x()?minimal().x():(width>maximal().x()?maximal().x():width);
+		height = height<minimal().y()?minimal().y():(height>maximal().y()?maximal().y():height);
 		this.size.set(width, height);
 	}
 	

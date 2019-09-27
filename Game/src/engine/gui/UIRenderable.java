@@ -6,10 +6,6 @@ import static org.lwjgl.opengl.GL15.glBufferSubData;
 
 import java.nio.ByteBuffer;
 
-import org.joml.Vector2f;
-
-import engine.opengl.Shader;
-
 public abstract class UIRenderable extends UIComponent{
 	
 	/** Byte buffer containing vertex data */
@@ -26,7 +22,15 @@ public abstract class UIRenderable extends UIComponent{
 	/**
 	 * Default constructor of a Renderable object
 	 */
-	public UIRenderable(boolean fitParent) {
+	protected UIRenderable() {
+		this(null);
+	}
+	
+	/**
+	 * Default constructor of a Renderable object
+	 */
+    protected UIRenderable(UIBox box) {
+    	super(box);
 		this.buffer = null;
 		this.horizontal = 0;
 		this.vertical = 0;
@@ -48,17 +52,26 @@ public abstract class UIRenderable extends UIComponent{
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 	
-	/**
-	 * This method render the component to the screen
-	 * It applies the global position offset of the absolute parent component
-	 * @param windowPos 
-	 */
-	public abstract void render(Shader shader, Vector2f windowPos);
-	
 	@Override
 	public void build(float x, float y, float width, float height) {
 		this.box.position(x, y);
 		this.box.size(width, height);
+		if(this.box.keepAspect()) {
+			float boxAspect = this.box().optimal().x() / this.box().optimal().y();
+			float aspect = this.box().size().x() / this.box().size().y();
+			if(boxAspect != 0.0f && aspect != 0.0f) {
+				float ratio = boxAspect/aspect;
+				if(ratio > 1.0f) {
+					float yOffset = (this.box.size().y() - (this.box.size().y()/ratio))/2.0f;
+					this.box.size(this.box.size().x(), this.box.size().y()/ratio);
+					this.box.position(x, y + yOffset);
+				}else if(ratio < 1.0f){
+					float xOffset = (this.box.size().x() - (this.box.size().x()*ratio))/2.0f;
+					this.box.size(this.box.size().x()*ratio, this.box.size().y());
+					this.box.position(x+xOffset, y);
+				}
+			}
+		}
 	}
 	
 	/**

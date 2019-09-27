@@ -2,7 +2,9 @@ package engine.gui;
 
 import java.util.LinkedList;
 
+import engine.ShaderManager;
 import engine.gui.shape.UIRectangle;
+import engine.utils.Color;
 
 
 public class UIPanel extends UIComponent{
@@ -24,16 +26,16 @@ public class UIPanel extends UIComponent{
 	public UIPanel() {
 		super();
 		this.children = new LinkedList<UIComponent>();
-		this.fitChildren = true;
 		this.layout(null);
+		this.fitChildren(true);
 		this.overlay = null;
 	}
 	
 	/** Overloaded constructor */
 	public UIPanel(UILayout layout) {
 		this.children = new LinkedList<UIComponent>();
-		this.fitChildren = true;
 		this.layout(layout);
+		this.fitChildren(true);
 		this.overlay = null;
 	}
 	
@@ -44,8 +46,8 @@ public class UIPanel extends UIComponent{
 	public UIPanel(UIBox box) {
 		super(box);
 		this.children = new LinkedList<UIComponent>();
-		this.fitChildren = false;
 		this.layout(null);
+		this.fitChildren(false);
 		this.overlay = null;
 	}
 	
@@ -57,7 +59,7 @@ public class UIPanel extends UIComponent{
 	public void layout(UILayout layout) {
 		// Set the new Layout
 		this.layout = layout;
-		if(this.layout == null) {
+		if(layout == null) {
 			this.layout = new UILayoutHorizontal();
 		}
 		// Give the layout the component list
@@ -65,7 +67,7 @@ public class UIPanel extends UIComponent{
 		// give the layout the box of the panel
 		this.layout.setOutputBox(this.box);
 		// Recompute the dimensions or correct minimal
-		this.computeDimension();
+		this.layout.findDimension();
 	}
 	
 	/**
@@ -73,18 +75,6 @@ public class UIPanel extends UIComponent{
 	 */
 	public UILayout layout() {
 		return this.layout;
-	}
-	
-	/**	 
-	 * This function calculates the Minimal, Optimal and Maximal
-	 * Dimensions of the component using the data of the children
-	 * components of the layout.
-	 * If fitChildren is false, then the function will only verify
-	 * that the panel size is bigger than the minimal size of the
-	 * children
-	 */
-	public void computeDimension() {
-		this.layout.findDimension(fitChildren);
 	}
 	
 	
@@ -117,11 +107,13 @@ public class UIPanel extends UIComponent{
 	 */
 	public void fitChildren(boolean fitChildren) {
 		this.fitChildren = fitChildren;		
-		this.computeDimension();
+		this.layout.fitChildren(this.fitChildren);
+		this.layout.findDimension();
 	}
 	
 	/**
-	 * Set the prefered dimensions of the panel and disactivate the keepAspect and 
+	 * Set the prefered dimensions of the panel and disactivate 
+	 * keep Aspect and fitChildren flags
 	 * @param minimalWidth dimension in pixel
 	 * @param minimalHeight dimension in pixel
 	 * @param optimalWidth dimension in pixel
@@ -129,10 +121,25 @@ public class UIPanel extends UIComponent{
 	 * @param maximalWidth dimension in pixel
 	 * @param maximalHeight dimension in pixel
 	 */
-	public void setDimension(float minimalWidth, float minimalHeight, float optimalWidth, float optimalHeight, float maximalWidth, float maximalHeight) {
+	public void dimension(float minimalWidth, float minimalHeight, float optimalWidth, float optimalHeight, float maximalWidth, float maximalHeight) {
 		this.box.minimal(minimalWidth, minimalHeight);
 		this.box.optimal(optimalWidth, optimalHeight);
 		this.box.maximal(maximalWidth, optimalHeight);
+		this.fitChildren(false);
+		this.layout.findDimension();
+	}
+	
+	/**
+	 * Render method for panels
+	 * @param shaders
+	 */
+	public void render(ShaderManager shaders) {
+		if(this.overlay != null) {
+			this.overlay.render(shaders);
+		}
+		for(UIComponent component : children) {
+			component.render(shaders);
+		}
 	}
 	
 	/**
@@ -144,7 +151,14 @@ public class UIPanel extends UIComponent{
 		if(component != null) {
 			component.parent(this);
 			this.children.add(component);
-			this.computeDimension();
+			this.layout.findDimension();
+			UIPanel panel = this;
+			while(panel.parent() != null) {
+				panel = (UIPanel) panel.parent();
+				if(!panel.layout.findDimension()) {
+					break;
+				}
+			}
 		}
 	}
 	
@@ -156,11 +170,20 @@ public class UIPanel extends UIComponent{
 	public void remove(UIComponent component, boolean destroy) {
 		if(component != null) {
 			if(this.children.remove(component)) {
-				this.computeDimension();
+				this.layout.findDimension();
 				if(destroy) {
 					component.destroy();
 				}
 			}
+		}
+	}
+	
+
+	public void overlay(int red, int green, int blue, int alpha) {
+		if(this.overlay == null) {
+			this.overlay = new UIRectangle(this.box, new Color(red, green, blue, alpha));
+		}else {
+			this.overlay.color(red, green, blue, alpha);
 		}
 	}
 	
@@ -173,10 +196,19 @@ public class UIPanel extends UIComponent{
 			component.destroy();
 		}
 		this.children.clear();
-		this.computeDimension();
+		this.layout.findDimension();
 	}
 	
-	
+	/**
+	 * UIMargin Setter
+	 * @param top in pixels
+	 * @param bottom in pixels
+	 * @param left in pixels
+	 * @param right in pixels
+	 */
+	public void margin(float top, float bottom, float left, float right) {
+		this.layout.margin(top, bottom, left, right);
+	}
 
 	@Override
 	public void destroy() {
@@ -187,4 +219,6 @@ public class UIPanel extends UIComponent{
 			comp.destroy();
 		}
 	}
+
+
 }

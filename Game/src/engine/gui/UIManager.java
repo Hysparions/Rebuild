@@ -3,6 +3,7 @@ package engine.gui;
 import java.util.LinkedList;
 
 import org.joml.Vector2i;
+import static org.lwjgl.opengl.GL30.*;
 
 import engine.ShaderManager;
 import engine.opengl.Shader;
@@ -55,8 +56,30 @@ public final class UIManager {
 	 * - If the selected component contains a Text listener => Give it keyboard input
 	 * - End of the function
 	 */
-	public void process() {
-		
+	public final void process() {
+		// Build all window
+		for(UIWindow window : windows) {
+			// Line needed to compute overlay of the content panel
+			window.panel.build(window.x(), window.y(), window.width(), window.height());
+			// Proceed every children
+			buildPanel(window.panel);
+		}
+	}
+	
+	/**
+	 * Resize and rebuild the entire UI
+	 * @param size of the screen
+	 */
+	public final void resize(Vector2i size) {
+		// Build all window
+		for(UIWindow window : windows) {
+			// Update window pos
+			window.updateBox(size);
+			// Line needed to compute overlay of the content panel
+			window.panel.build(window.x(), window.y(), window.width(), window.height());
+			// Proceed every children
+			buildPanel(window.panel);
+		}
 	}
 	
 	/**
@@ -64,12 +87,15 @@ public final class UIManager {
 	 * the window order is important as windows rendered first
 	 * may be overlapped by windows rendered after
 	 */
-	public void render() {
+	public final void render() {
+		
+		glDisable(GL_DEPTH_TEST);
 		for(UIWindow window : this.windows) {
 			if(window.isVisible()) {
 				window.render(shaders);
 			}
 		}
+		glEnable(GL_DEPTH_TEST);
 	}
 	
 	/**
@@ -78,7 +104,7 @@ public final class UIManager {
 	 * @param window to register
 	 * @return true if the operation succeed, false instead 
 	 */
-	public boolean register(UIWindow window) {
+	public final boolean register(UIWindow window) {
 		if(window != null) {
 			for(UIWindow elem : windows) {
 				if(elem == window || elem.name().equals(window.name())) {
@@ -97,7 +123,7 @@ public final class UIManager {
 	 * @param destroy to true if the Wrapper should be destroyed
 	 * @return the wrapper if destroy was false, null if the wrapper doesn't exist or was destroyed
 	 */
-	public UIWindow unregister(String name, boolean destroy) {
+	public final UIWindow unregister(String name, boolean destroy) {
 		UIWindow wrapper = null;
 		wrapper = this.get(name);
 		if(destroy) {
@@ -113,7 +139,7 @@ public final class UIManager {
 	 * @param name of the window
 	 * @return true if the operation succeed, false if the dimensions are higher than max or lower than min values
 	 */
-	public boolean resize(String name, float width, float height) {
+	public final boolean resize(String name, float width, float height) {
 		UIWindow window = this.get(name);
 		if(window != null) {
 			window.resize(width, height);
@@ -128,13 +154,25 @@ public final class UIManager {
 	 * @param name of the window
 	 * @return true if the operation succeed, false if the dimensions are higher than max or lower than min values
 	 */
-	public boolean reposition(String name, float x, float y) {
+	public final boolean reposition(String name, float x, float y) {
 		UIWindow window = this.get(name);
 		if(window != null) {
 			window.reposition(x, y);
 			return true;
 		}
 		return false;
+	}
+	
+	private final void buildPanel(UIPanel panel) {
+		// Build children of the panel
+		panel.buildChildren();
+		
+		// If the panel have child panel, repeat the function
+		for(UIComponent component : panel.children) {
+			if(component instanceof UIPanel) {
+				buildPanel((UIPanel) component);
+			}
+		}
 	}
 	
 	/**

@@ -36,7 +36,7 @@ public class UILayoutHorizontal extends UILayout{
 	
 	
 	@Override
-	public boolean findDimension(boolean fitChildren) {
+	public boolean findDimension() {
 
 		boolean modified = false;
 		float minX =0.0f, minY = 0.0f;
@@ -104,7 +104,44 @@ public class UILayoutHorizontal extends UILayout{
 
 	@Override
 	public void buildChildren() {
-		
+
+		float x = this.box.position().x() + margin.left();
+		float y = this.box.position().y() + margin.top();
+		float w = this.box.size().x();
+		float h = this.box.size().y() - margin.top()-margin.bottom();
+
+		if(this.box.minimal().x() <= w && this.box.maximal().x() >= w){
+			
+			// Compute interpolation ratio between min and max
+			float ratio;
+			if(this.box.maximal().x() - this.box.minimal().x() == 0.0f) { 
+				ratio = 0.0f;
+			}else {
+				ratio = (w-this.box.minimal().x()) / (this.box.maximal().x() - this.box.minimal().x());
+			}
+			// Keep offset
+			float offset = x;
+			for(UIComponent component : children) {
+				component.build(offset, y, component.box.minimal().x() +(component.box.maximal().x()-component.box.minimal().x()) * ratio, h );
+				offset += component.box.minimal().x() +(component.box.maximal().x()-component.box.minimal().x()) * ratio;
+			}
+		}
+		// Case over maximal
+		else {
+			float offset = x;
+			// Compute offset position with the alignment
+			if(this.horizontal == UIAlignmentHorizontal.LEFT) {
+				offset = x;
+			}else if(this.horizontal == UIAlignmentHorizontal.CENTER) {
+				offset = x + ((w-this.box.maximal().x())/2.0f);
+			}else if(this.horizontal == UIAlignmentHorizontal.RIGHT) {
+				offset = x + w-this.box.maximal().x();
+			}
+			for(UIComponent component : children) {
+				component.build(offset, y, box.maximal().x() , h);
+				offset += box.maximal().x();
+			}
+		}
 	}
 
 

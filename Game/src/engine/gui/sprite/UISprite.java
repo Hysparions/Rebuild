@@ -1,14 +1,12 @@
 package engine.gui.sprite;
 
-import org.joml.Vector2f;
-
+import engine.ShaderManager;
 import engine.gui.UIRenderable;
-import engine.opengl.Shader;
 
 public class UISprite extends UIRenderable{
 
-	public UISprite(boolean fitSize) {
-		super(fitSize);
+	public UISprite() {
+		super(null);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -19,7 +17,7 @@ public class UISprite extends UIRenderable{
 	}
 
 	@Override
-	public void render(Shader shader, Vector2f windowPos) {
+	public void render(ShaderManager shaders) {
 		// TODO Auto-generated method stub
 		
 	}
